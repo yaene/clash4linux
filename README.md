@@ -1,5 +1,6 @@
 # Clash4Linux
-A linux client for administrating [clash](https://github.com/Dreamacro/clash) proxy through their API
+A linux client for administrating [clash](https://github.com/Dreamacro/clash) proxy through their API.
+Built with Qt and Rust.
 
 ### useful commands
 [api reference](https://github.com/Dreamacro/clash/wiki/External-controller-API-Reference)
