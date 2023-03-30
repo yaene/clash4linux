@@ -33,6 +33,21 @@ pub fn read_selectors() -> Result<Vec<String>, reqwest::Error> {
         .collect::<Vec<String>>())
 }
 
+pub fn read_proxies_for_selector(
+    selector: &str,
+) -> Result<Vec<String>, reqwest::Error> {
+    let proxies = &read_proxies()?.json::<serde_json::Value>()?["proxies"]
+        [selector]["all"];
+
+    let proxies = proxies.as_array();
+
+    Ok(proxies
+        .expect("unexpected response format, check code")
+        .iter()
+        .filter_map(serde_json::Value::as_str)
+        .map(String::from)
+        .collect::<Vec<String>>())
+}
 #[cfg(test)]
 mod tests {
 
@@ -65,6 +80,18 @@ mod tests {
 
     fn test_read_selectors() {
         match read_selectors() {
+            Ok(resp) => {
+                println!("{:#?}", resp);
+            }
+            Err(err) => {
+                println!("{:#?}", err);
+            }
+        }
+    }
+
+    #[test]
+    fn test_read_proxies_for_selector() {
+        match read_proxies_for_selector("🚀 节点选择") {
             Ok(resp) => {
                 println!("{:#?}", resp);
             }
