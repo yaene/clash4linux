@@ -48,10 +48,31 @@ pub fn read_proxies_for_selector(
         .map(String::from)
         .collect::<Vec<String>>())
 }
+
+pub fn read_current_proxy(selector: &str) -> Result<String, reqwest::Error> {
+    Ok(
+        read_proxies()?.json::<serde_json::Value>()?["proxies"][selector]
+            ["now"]
+            .to_string(),
+    )
+}
+
 #[cfg(test)]
 mod tests {
 
     use super::*;
+
+    #[test]
+    fn test_read_current_proxy() {
+        match read_current_proxy("🚀 节点选择") {
+            Ok(resp) => {
+                println!("{:#?}", resp);
+            }
+            Err(err) => {
+                println!("{:#?}", err);
+            }
+        }
+    }
 
     #[test]
     fn test_read_proxies() {

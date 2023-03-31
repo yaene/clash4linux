@@ -2,8 +2,8 @@ use std::rc::Rc;
 
 use cpp_core::{Ptr, StaticUpcast};
 use qt_core::{
-    cpp_core::CppBox, qs, slot, QBox, QListOfQString, QObject, QPtr, QString,
-    QStringList, SlotNoArgs,
+    cpp_core::CppBox, qs, slot, MatchFlag, QBox, QListOfQString, QObject, QPtr,
+    QString, QStringList, SlotNoArgs,
 };
 use qt_widgets::{QApplication, QLabel, QListView, QListWidget, QMainWindow};
 
@@ -53,12 +53,22 @@ impl ProxyWidget {
         // todo yb: error handling when no selectors
         self.selector.set_current_row_1a(0);
         self.selector.resize_2a(500, 300);
-        self.proxies.add_items(&to_qstring_list(
-            &administrator::read_proxies_for_selector(
-                &self.selector.current_item().text().to_std_string(),
-            )
-            .unwrap(),
-        ));
+        let current_selector =
+            &self.selector.current_item().text().to_std_string();
+
+        let proxies =
+            &administrator::read_proxies_for_selector(current_selector)
+                .unwrap();
+
+        self.proxies.add_items(&to_qstring_list(proxies));
+        let current_proxy =
+            administrator::read_current_proxy(current_selector).unwrap();
+        let current_proxy = current_proxy.trim_matches('"');
+        let current_proxy = self
+            .proxies
+            .find_items(&qs(current_proxy), MatchFlag::MatchExactly.into())
+            .first();
+        self.proxies.set_current_item_1a(*current_proxy);
         self.proxies.resize_2a(500, 300);
         self.proxies.move_2a(0, 300);
     }
@@ -69,13 +79,22 @@ impl ProxyWidget {
 
     #[slot(SlotNoArgs)]
     unsafe fn on_selector_selection_changed(self: &Self) {
+        let current_selector =
+            &self.selector.current_item().text().to_std_string();
+
         self.proxies.clear();
         self.proxies.add_items(&to_qstring_list(
-            &administrator::read_proxies_for_selector(
-                &self.selector.current_item().text().to_std_string(),
-            )
-            .unwrap(),
+            &administrator::read_proxies_for_selector(current_selector)
+                .unwrap(),
         ));
+        let current_proxy =
+            administrator::read_current_proxy(current_selector).unwrap();
+        let current_proxy = current_proxy.trim_matches('"');
+        let current_proxy = self
+            .proxies
+            .find_items(&qs(current_proxy), MatchFlag::MatchExactly.into())
+            .first();
+        self.proxies.set_current_item_1a(*current_proxy);
     }
 }
 
