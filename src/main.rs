@@ -69,6 +69,9 @@ impl ProxyWidget {
             .find_items(&qs(current_proxy), MatchFlag::MatchExactly.into())
             .first();
         self.proxies.set_current_item_1a(*current_proxy);
+        self.proxies
+            .current_item_changed()
+            .connect(&self.slot_on_proxy_selection_changed());
         self.proxies.resize_2a(500, 300);
         self.proxies.move_2a(0, 300);
     }
@@ -95,6 +98,16 @@ impl ProxyWidget {
             .find_items(&qs(current_proxy), MatchFlag::MatchExactly.into())
             .first();
         self.proxies.set_current_item_1a(*current_proxy);
+    }
+
+    #[slot(SlotNoArgs)]
+    unsafe fn on_proxy_selection_changed(self: &Self) {
+        let selector = &self.selector.current_item().text().to_std_string();
+        if !self.proxies.current_item().is_null() {
+            let proxy = &self.proxies.current_item().text().to_std_string();
+
+            administrator::use_proxy(selector, &proxy);
+        }
     }
 }
 
